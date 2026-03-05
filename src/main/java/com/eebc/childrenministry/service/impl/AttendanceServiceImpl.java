@@ -54,8 +54,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             attendance.setRoomId(resolveRoomForChild(attendance.getChildId()));
         }
 
-        Attendance attendanceForChild = attendanceRepository.findByChildIdAndServiceId(attendance.getChildId(), attendance.getServiceId());
-        if(attendanceForChild != null){
+        if(checkIfChildIsCheckedIn(attendance.getChildId(), attendance.getServiceId())){
             throw new IllegalStateException("Attendance already exists for child ID: " + attendance.getChildId() + " and service ID: " + attendance.getServiceId());
         }
 
@@ -83,8 +82,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         return (int) ChronoUnit.MONTHS.between(dateOfBirth, LocalDate.now());
     }
 
-    private boolean checkIfChildIsCheckIn(String childId, String serviceId) {
+    private boolean checkIfChildIsCheckedIn(String childId, String serviceId) {
         Attendance attendance = attendanceRepository.findByChildIdAndServiceId(childId, serviceId);
+        System.out.println("Checking if child ID " + childId + " is already checked in for service ID " + serviceId + ": " + (attendance != null));
         if(attendance != null){
             return true;
         }

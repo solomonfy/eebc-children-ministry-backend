@@ -29,7 +29,6 @@ public class AttendanceController {
 
     @PostMapping
     public ResponseEntity<List<Attendance>> createMany(@RequestBody List<Attendance> records) {
-        List<Attendance> saved = repository.saveAll(records);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(attendanceService.getAllAttendances());
     }
 }
