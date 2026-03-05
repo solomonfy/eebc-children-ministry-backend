@@ -24,9 +24,15 @@ public class Room {
     private String capacity;
     private String location;
     private Long active = 1L;
-    private Long min_age_months = 0L;
-    private Long max_age_months = 0L;
-    private Long ratio_child_to_volunteer = 0L;
+
+    @Column(name="min_age_months")
+    private Long minAgeMonths = 0L;
+
+    @Column(name="max_age_months")
+    private Long maxAgeMonths = 0L;
+
+    @Column(name="ratio_child_to_volunteer")
+    private Long ratioChildToVolunteer = 0L;
 
     @Column(nullable = false)
     private String campus_id;
