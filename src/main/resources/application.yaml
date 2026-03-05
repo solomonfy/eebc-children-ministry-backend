@@ -1,0 +1,45 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: eebc-children-ministry-backend
+  datasource:
+    url: "jdbc:mysql://localhost:3306/eebc-children-ministry?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+    username: root
+    password: administrator
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+#    database-platform: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false  # fixes the open-in-view warning
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  docker:
+    compose:
+      enabled: false
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: https://vztaogfyqwirreavhuib.supabase.co/auth/v1
+#          jwk-set-uri: https://vztaogfyqwirreavhuib.supabase.co/auth/v1/.well-known/jwks.json
+
+logging:
+  level:
+    root: INFO
+    com.eebc: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+
+jwt:
+  secret: your-super-secret-key-min-32-chars-change-in-production-12345
+  expiry: 86400000
