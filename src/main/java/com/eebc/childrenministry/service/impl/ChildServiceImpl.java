@@ -108,6 +108,23 @@ public class ChildServiceImpl implements ChildService {
         dto.setFirstName(child.getFirstName());
         dto.setLastName(child.getLastName());
         dto.setBirthDate(child.getBirthDate());
+        dto.setFamilyId(child.getFamilyId());
+        dto.setDefaultRoomId(child.getDefaultRoomId());
+        dto.setNickname(child.getNickname());
+        dto.setGender(child.getGender());
+        dto.setGrade(child.getGrade());
+        dto.setPhotoUrl(child.getPhotoUrl());
+        dto.setNotes(child.getNotes());
+        dto.setSpecialNeeds(child.getSpecialNeeds());
+        dto.setEpiPenRequired(child.getEpiPenRequired());
+        dto.setMedicalConditions(child.getMedicalConditions());
+        dto.setMedications(child.getMedications());
+        dto.setStatus(child.getStatus());
+        dto.setEnrolledDate(child.getEnrolledDate());
+        dto.setCreatedAt(child.getCreatedAt());
+        dto.setUpdatedAt(child.getUpdatedAt());
+
+
 
         List<ChildDTO.ChildAllergyDTO> allergies = child.getAllergies()
                 .stream()

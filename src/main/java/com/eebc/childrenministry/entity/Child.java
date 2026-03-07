@@ -61,6 +61,10 @@ public class Child {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<String> medicalConditions = new ArrayList<>();
 
+    @Column(name = "medications", columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<String> medications = new ArrayList<>();
+
     @OneToMany(mappedBy = "child", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ChildAllergy> allergies = new ArrayList<>();
 
