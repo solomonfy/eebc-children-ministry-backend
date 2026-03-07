@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,22 +23,55 @@ import java.util.UUID;
 public class Guardian {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    private String id;
 
-    private UUID family_id;
+    @Column(name = "family_id", nullable = false)
+    private String familyId;
 
-    @Column(nullable = false)
-    private String first_name;
+    @Column(name = "user_id")
+    private String userId;
 
-    @Column(nullable = false)
-    private String last_name;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     private String phone;
     private String email;
-    private String relationship;
 
-    private Boolean is_primary = false;
+    @Column(nullable = false, columnDefinition = "VARCHAR(65) DEFAULT 'PARENT'")
+    private String relationship = "PARENT";
 
-    private LocalDateTime created_at = LocalDateTime.now();
-    private LocalDateTime updated_at = LocalDateTime.now();
+    @Column(name = "is_primary", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean isPrimary = false;
+
+
+    @Column(name = "allowed_pickup", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private Boolean allowedPickup = true;
+
+    // ── Kiosk PIN ───────────────────────────
+    // Raw PIN never stored — only BCrypt hash
+    // NULL means PIN not set yet for this guardian
+    @Column(name = "checkin_pin_hash", nullable = true)
+    private String checkinPinHash;
+
+    @Column(name = "pin_set_at")
+    private LocalDateTime pinSetAt;
+
+    @Column(name = "photo_url")
+    private String photoUrl;
+
+    @Column(nullable = false,
+            columnDefinition = "TINYINT(1) DEFAULT 1")
+    private Boolean active = true;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

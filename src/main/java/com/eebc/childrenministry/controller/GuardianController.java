@@ -2,15 +2,15 @@ package com.eebc.childrenministry.controller;
 
 import com.eebc.childrenministry.entity.Guardian;
 import com.eebc.childrenministry.repository.GuardianRepository;
+import com.eebc.childrenministry.service.GuardianService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/guardians")
@@ -18,6 +18,7 @@ import java.util.List;
 public class GuardianController {
 
     private final GuardianRepository repository;
+    private final GuardianService guardianService;
 
     @GetMapping
     public ResponseEntity<List<Guardian>> list() {
@@ -28,5 +29,35 @@ public class GuardianController {
     public ResponseEntity<Guardian> create(@RequestBody Guardian g) {
         Guardian saved = repository.save(g);
         return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/{id}/pin")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    public ResponseEntity<?> setPin(
+            @PathVariable String id,
+            @RequestBody Map<String, String> body) {
+        guardianService.setPin(id, body.get("pin"));
+        return ResponseEntity.ok(Map.of("message", "PIN set successfully"));
+    }
+
+    @DeleteMapping("/{id}/pin")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    public ResponseEntity<?> removePin(@PathVariable String id) {
+        guardianService.removePin(id);
+        return ResponseEntity.ok(Map.of("message", "PIN removed"));
+    }
+
+    // Kiosk endpoint — no auth required (public kiosk)
+    @PostMapping("/by-pin")
+    public ResponseEntity<?> findByPin(@RequestBody Map<String, String> body) {
+        return guardianService.findByPin(body.get("pin"))
+                .map(g -> ResponseEntity.ok(Map.of(
+                        "guardianId", g.getId(),
+                        "firstName", g.getFirstName(),
+                        "lastName", g.getLastName(),
+                        "familyId", g.getFamilyId()
+                )))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "PIN not recognized")));
     }
 }

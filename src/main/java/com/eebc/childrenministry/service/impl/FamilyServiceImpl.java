@@ -3,15 +3,19 @@ package com.eebc.childrenministry.service.impl;
 import com.eebc.childrenministry.entity.Family;
 import com.eebc.childrenministry.repository.FamilyRepository;
 import com.eebc.childrenministry.service.FamilyService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Service
+@RequiredArgsConstructor
 public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
@@ -57,11 +61,15 @@ public class FamilyServiceImpl implements FamilyService {
                 return Optional.empty();
             }
             logger.info("Retrieved family: {} with name: {}", family, name);
-//            Optional<Family> family1 = (Optional<Family>) Optional.of(family);
             return family;
         } catch (Exception e) {
             logger.error("Error retrieving family with name {}: {}", name, e.getMessage());
         }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Family> getFamilyByPin(String pin) {
         return Optional.empty();
     }
 
