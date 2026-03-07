@@ -1,102 +1,130 @@
 package com.eebc.childrenministry.service.impl;
 
+import com.eebc.childrenministry.dto.ChildDTO;
 import com.eebc.childrenministry.entity.Child;
-import com.eebc.childrenministry.entity.Family;
+import com.eebc.childrenministry.entity.ChildAllergy;
 import com.eebc.childrenministry.repository.ChildRepository;
 import com.eebc.childrenministry.repository.FamilyRepository;
 import com.eebc.childrenministry.service.ChildService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ChildServiceImpl implements ChildService {
-    @Autowired
-    ChildRepository childRepository;
 
-    @Autowired
-    FamilyRepository familyRepository;
+    private final ChildRepository childRepository;
+    private final FamilyRepository familyRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(ChurchServiceImpl.class);
-
-    @Autowired
-    private BCryptPasswordEncoder encoder;  // reuse the same bean from SecurityConfig
-
-//    public Child registerChild(Child child, String rawPin) {
-//        if (rawPin != null && !rawPin.isBlank()) {
-//            child.setPickUpPinHash(encoder.encode(rawPin));
-//        }
-//        return childRepository.save(child);
-//    }
-//
-//    public boolean verifyPickupPin(String childId, String rawPin) {
-//        Child child = childRepository.findById(childId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Child not found"));
-//        if (child.getPickUpPinHash() == null) return false;
-//        return encoder.matches(rawPin, child.getPickUpPinHash());
-//    }
+    private static final Logger logger = LoggerFactory.getLogger(ChildServiceImpl.class);
 
     @Override
-    public List<Child> getAllChildren() {
-        List<Child> childList = new ArrayList<>();
+    @Transactional(readOnly = true)
+    public List<ChildDTO> getAllChildren() {
         try {
-            childList = childRepository.findAll();
-            logger.info("Retrieved {} children from the repository.", childList);
-            return childList;
+            List<ChildDTO> children = childRepository.findAllWithAllergies()
+                    .stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+            logger.info("Retrieved {} children from the repository.", children.size());
+            return children;
         } catch (Exception e) {
-            logger.error("Error retrieving children from the repository: {}", e.getMessage());
-            return null;
+            logger.error("Error retrieving children: {}", e.getMessage());
+            return List.of();
         }
     }
 
     @Override
-    public List<Child> getChildrenByFamilyId(String familyId) {
+    @Transactional(readOnly = true)
+    public List<ChildDTO> getChildrenByFamilyId(String familyId) {
         try {
-            Optional<Family> family = familyRepository.findById(familyId);
-            if (family == null) {
+            if (familyRepository.findById(familyId).isEmpty()) {
                 logger.warn("No family found with ID: {}", familyId);
-                return null;
+                return List.of();
             }
-            List<Child> children = childRepository.findByFamilyId(familyId);
+            List<ChildDTO> children = childRepository.findByFamilyId(familyId)
+                    .stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
             logger.info("Retrieved {} children for family ID: {}", children.size(), familyId);
             return children;
         } catch (Exception e) {
             logger.error("Error retrieving children for family ID {}: {}", familyId, e.getMessage());
+            return List.of();
         }
-        return null;
     }
 
     @Override
-    public Optional<Optional<Child>> getChildById(String id) {
+    @Transactional(readOnly = true)
+    public Optional<ChildDTO> getChildById(String id) {
         try {
-            Optional<Child> child = childRepository.findById(id);
-            if (child == null) {
-                logger.warn("No family found with ID: {}", id);
-                return Optional.empty();
-            }
-            logger.info("Retrieved family: {} with ID: {}", child, id);
-            return Optional.of(child);
+            return childRepository.findByIdWithAllergies(id)
+                    .map(this::toDTO);
         } catch (Exception e) {
             logger.error("Error retrieving child with ID {}: {}", id, e.getMessage());
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     @Override
-    public Optional<Child> getChildByLastName(String last_name) {
-        return Optional.empty();
+    @Transactional(readOnly = true)
+    public Optional<ChildDTO> getChildByLastName(String lastName) {
+        try {
+            List<Child> children = childRepository.findAllWithAllergies()
+                    .stream()
+                    .filter(c -> c.getLastName().equalsIgnoreCase(lastName))
+                    .collect(Collectors.toList());
+
+            if (children.isEmpty()) {
+                logger.warn("No child found with last name: {}", lastName);
+                return Optional.empty();
+            }
+            if (children.size() > 1) {
+                logger.warn("Multiple children found with last name: {}. Returning the first match.", lastName);
+            }
+            return Optional.of(toDTO(children.get(0)));
+        } catch (Exception e) {
+            logger.error("Error retrieving child with last name {}: {}", lastName, e.getMessage());
+            return Optional.empty();
+        }
     }
 
     @Override
-    public Child createChild(Child child) {
-        return null;
+    public ChildDTO createChild(Child child) {
+        Child saved = childRepository.save(child);
+        return toDTO(saved);
+    }
+
+    private ChildDTO toDTO(Child child) {
+        ChildDTO dto = new ChildDTO();
+        dto.setId(child.getId());
+        dto.setFirstName(child.getFirstName());
+        dto.setLastName(child.getLastName());
+        dto.setBirthDate(child.getBirthDate());
+
+        List<ChildDTO.ChildAllergyDTO> allergies = child.getAllergies()
+                .stream()
+                .map(this::toAllergyDTO)
+                .collect(Collectors.toList());
+        dto.setAllergies(allergies);
+        return dto;
+    }
+
+    private ChildDTO.ChildAllergyDTO toAllergyDTO(ChildAllergy allergy) {
+        ChildDTO.ChildAllergyDTO dto = new ChildDTO.ChildAllergyDTO();
+        dto.setId(allergy.getId());
+        dto.setAllergyName(allergy.getAllergyName());
+        dto.setSeverity(allergy.getSeverity());
+        dto.setReaction(allergy.getReaction());
+        dto.setTreatment(allergy.getTreatment());
+        dto.setNotes(allergy.getNotes());
+        return dto;
     }
 }

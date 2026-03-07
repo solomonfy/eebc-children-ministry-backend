@@ -2,11 +2,19 @@ package com.eebc.childrenministry.repository;
 
 import com.eebc.childrenministry.entity.Child;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ChildRepository extends JpaRepository<Child, String> {
-    Optional<Child> findById(String id);
+
+    @Query("SELECT DISTINCT c FROM Child c LEFT JOIN FETCH c.allergies")
+    List<Child> findAllWithAllergies();
+
+    @Query("SELECT c FROM Child c LEFT JOIN FETCH c.allergies WHERE c.id = :id")
+    Optional<Child> findByIdWithAllergies(@Param("id") String id);
+
     List<Child> findByFamilyId(String familyId);
 }

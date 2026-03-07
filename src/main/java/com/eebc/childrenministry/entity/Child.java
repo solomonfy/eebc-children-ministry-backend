@@ -9,6 +9,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,8 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Builder
 public class Child {
 
     @Id
@@ -25,7 +25,7 @@ public class Child {
     @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
     private String id;
 
-    @Column(name = "family_id", nullable = false)
+    @Column(name = "family_id", nullable = false, columnDefinition = "CHAR(36)")
     private String familyId;
 
     @Column(name = "first_name", nullable = false)
@@ -46,7 +46,7 @@ public class Child {
     @Column(name = "photo_url")
     private String photoUrl;
 
-    @Column(name = "default_room_id")
+    @Column(name = "default_room_id", columnDefinition = "CHAR(36)")
     private String defaultRoomId;
 
     @Column(name = "special_needs")
@@ -59,11 +59,10 @@ public class Child {
 
     @Column(name = "medical_conditions", columnDefinition = "json")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<String> allergies;
-//    private List<String> medical_conditions;
+    private List<String> medicalConditions = new ArrayList<>();
 
-//    @Column(name = "pick_up_hash")
-//    private String pickUpPinHash;
+    @OneToMany(mappedBy = "child", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ChildAllergy> allergies = new ArrayList<>();
 
     @Column(nullable = false)
     private String status = "ACTIVE";
