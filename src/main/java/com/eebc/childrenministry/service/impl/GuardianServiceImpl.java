@@ -41,6 +41,7 @@ public class GuardianServiceImpl implements GuardianService {
 
         guardian.setCheckinPinHash(encoder.encode(rawPin));
         guardian.setPinSetAt(LocalDateTime.now());
+        guardian.setUpdatedAt(LocalDateTime.now());
         guardianRepository.save(guardian);
     }
 
@@ -53,6 +54,7 @@ public class GuardianServiceImpl implements GuardianService {
                 ));
         guardian.setCheckinPinHash(null);
         guardian.setPinSetAt(null);
+        guardian.setUpdatedAt(LocalDateTime.now());
         guardianRepository.save(guardian);
     }
 

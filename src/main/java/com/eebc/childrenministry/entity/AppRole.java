@@ -1,5 +1,13 @@
 package com.eebc.childrenministry.entity;
 
 public enum AppRole {
-    ADMIN, STAFF, VOLUNTEER, GUARDIAN
+    DIRECTOR,
+    ADMIN,
+    STAFF,
+    CLASS_COORDINATOR,
+    CLASS_ASSISTANT,
+    TEACHER,
+    VOLUNTEER,
+    GUARDIAN,
+    CHECKIN_OUT_RECEPTIONIST
 }
