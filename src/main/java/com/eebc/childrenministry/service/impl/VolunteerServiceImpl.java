@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class VolunteerServiceImpl implements VolunteerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChurchServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(VolunteerServiceImpl.class);
 
     @Autowired
     VolunteerRepository volunteerRepository;

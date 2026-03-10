@@ -22,8 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChurchController {
 
-    @Autowired
-    private final ChurchRepository churchRepository;
 
     @Autowired
     private ChurchService churchService;
@@ -37,14 +35,13 @@ public class ChurchController {
 
     @GetMapping("/{id}")
     public Optional<Church> getChurchById(@PathVariable String id) {
-//        UUID churchId = UUID.fromString(id); // convert String to UUID
         Optional<Church> church = churchService.getChurchById(id);
         return ResponseEntity.ok(church).getBody();
     }
 
     @PostMapping
     public ResponseEntity<Church> createChurch(@RequestBody Church church) {
-        Church saved = churchRepository.save(church);
+        Church saved = churchService.saveChurch(church);
         return ResponseEntity.ok(saved);
     }
 

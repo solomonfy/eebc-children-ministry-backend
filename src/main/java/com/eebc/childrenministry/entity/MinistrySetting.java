@@ -1,17 +1,14 @@
 package com.eebc.childrenministry.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.eebc.childrenministry.enums.CheckInMode;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ministry_settings")
@@ -19,18 +16,72 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MinistrySetting {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    private String id;
 
-    private UUID ministry_id;
+    @Column(name = "ministry_id", nullable = false, unique = true)
+    private String ministryId;
 
-    @Column(name = "key", nullable = false)
-    private String settingKey;
+    // ── Check-in Mode ──────────────────────────
+    // PRINT_ONLY | DIGITAL_ONLY | PRINT_AND_DIGITAL
+    @Column(name = "checkin_mode", nullable = false)
+    private String checkinMode = CheckInMode.PRINT_ONLY.name();
 
-    @Column(name = "value", columnDefinition = "text")
-    private String settingValue;
+    // ── Check-in Methods ───────────────────────
+    @Column(name = "enable_last_name_checkin")
+    private Boolean enableLastNameCheckin = true;
 
-    private LocalDateTime created_at = LocalDateTime.now();
-    private LocalDateTime updated_at = LocalDateTime.now();
+    @Column(name = "enable_phone_number_checkin")
+    private Boolean enablePhoneNumberCheckin = true;
+
+    @Column(name = "enable_qr_code_checkin")
+    private Boolean enableQrCodeCheckin = true;
+
+    @Column(name = "enable_pin_code_checkin")
+    private Boolean enablePinCodeCheckin = true;
+
+    // ── Timing ─────────────────────────────────
+    @Column(name = "checkin_early_minutes")
+    private Integer checkinEarlyMinutes = 30;
+
+    @Column(name = "checkin_late_minutes")
+    private Integer checkinLateMinutes = 15;
+
+    // ── Auto Checkout ──────────────────────────
+    @Column(name = "auto_checkout_enabled")
+    private Boolean autoCheckoutEnabled = false;
+
+    @Column(name = "auto_checkout_minutes")
+    private Integer autoCheckoutMinutes = 30;
+
+    // ── Pickup ─────────────────────────────────
+    @Column(name = "pickup_code_length")
+    private Integer pickupCodeLength = 4;
+
+    @Column(name = "require_pickup_code")
+    private Boolean requirePickupCode = true;
+
+    @Column(name = "allow_guest_checkin")
+    private Boolean allowGuestCheckin = true;
+
+    // ── Features ───────────────────────────────
+    @Column(name = "lessons_enabled")
+    private Boolean lessonsEnabled = true;
+
+    @Column(name = "parent_recaps_enabled")
+    private Boolean parentRecapsEnabled = true;
+
+    @Column(name = "incidents_enabled")
+    private Boolean incidentsEnabled = true;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

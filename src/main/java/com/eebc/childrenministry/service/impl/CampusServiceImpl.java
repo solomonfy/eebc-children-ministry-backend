@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class CampusServiceImpl implements CampusService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChurchServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CampusServiceImpl.class);
 
     @Autowired
     CampusRepository campusRepository;

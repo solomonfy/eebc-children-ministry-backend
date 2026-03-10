@@ -35,18 +35,18 @@ public class Room {
     private Ministry ministry_id;
 
     private String notes;
-    private String capacity;
+    private Integer capacity;
     private String location;
     private Long active = 1L;
 
     @Column(name="min_age_months")
-    private Long minAgeMonths = 1L;
+    private Integer minAgeMonths;
 
     @Column(name="max_age_months")
-    private Long maxAgeMonths = 204L;
+    private Integer maxAgeMonths;
 
     @Column(name="ratio_child_to_volunteer")
-    private Long ratioChildToVolunteer = 0L;
+    private Integer ratioChildToVolunteer;
 
 
     @CreationTimestamp
@@ -60,4 +60,8 @@ public class Room {
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'ACTIVE'")
     private String status = "ACTIVE";
 
+    public void setMinistry_id(String ministryId) {
+        this.ministry_id = new Ministry();
+        this.ministry_id.setId(ministryId);
+    }
 }

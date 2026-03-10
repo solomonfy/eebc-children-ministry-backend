@@ -21,7 +21,7 @@ public class FamilyServiceImpl implements FamilyService {
     @Autowired
     FamilyRepository familyRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(ChurchServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(FamilyServiceImpl.class);
 
     @Override
     public List<Family> getAllFamilies() {
