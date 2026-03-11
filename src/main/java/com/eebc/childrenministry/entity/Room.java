@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Room {
+public class Room extends Auditable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

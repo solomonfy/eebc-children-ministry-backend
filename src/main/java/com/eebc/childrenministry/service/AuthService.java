@@ -82,7 +82,7 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         logger.info("User {} logged in successfully", req.email());
-        return jwtUtil.generateToken(u.getEmail(), u.getRole());
+        return jwtUtil.generateToken(u.getEmail(), u.getRole(), u.getId());
     }
 
     // 2. Generate username

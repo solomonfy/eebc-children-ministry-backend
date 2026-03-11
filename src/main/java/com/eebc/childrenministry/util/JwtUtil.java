@@ -1,5 +1,6 @@
 package com.eebc.childrenministry.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -22,43 +23,67 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String email, String role) {
+    // ── Token generation ───────────────────────
+    // userId is now embedded as a claim so audit history
+    // and other services can identify who made a change.
+    public String generateToken(String email, String role, String userId) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("userId", userId)        // ← NEW
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiryMs))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String extractEmail(String token) {
+    // ── Backwards-compatible overload ─────────
+    // Remove once AuthController is updated to pass userId.
+    @Deprecated
+    public String generateToken(String email, String role) {
+        return generateToken(email, role, null);
+    }
+
+    // ── Claim extraction ───────────────────────
+    private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
+    }
+
+    public String extractEmail(String token) {
+        return extractAllClaims(token).getSubject();
     }
 
     public String extractRole(String token) {
-        return (String) Jwts.parser()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role");
+        return extractAllClaims(token).get("role", String.class);
     }
 
+    public String extractUserId(String token) {
+        return extractAllClaims(token).get("userId", String.class);
+    }
+
+    public String extractFirstName(String token) {
+        return extractAllClaims(token).get("firstName", String.class);
+    }
+
+    public String extractLastName(String token) {
+        return extractAllClaims(token).get("lastName", String.class);
+    }
+
+    // ── Validation ─────────────────────────────
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(getKey())
-                    .build()
-                    .parseClaimsJws(token);
+            extractAllClaims(token);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).get("userName", String.class);
     }
 }

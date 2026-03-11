@@ -1,10 +1,13 @@
 package com.eebc.childrenministry.config;
 
 import com.eebc.childrenministry.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+//import org.apache.catalina.core.ApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +23,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+   @Autowired
+   private ApplicationContext applicationContext;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -45,6 +51,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                             );
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // ── Populate RequestContext for audit trail ──
+                    try {
+                        String username = jwtUtil.extractUsername(token);
+                        RequestContext ctx = applicationContext.getBean(RequestContext.class);
+
+                        // userId — try to get from token claims, fallback to username
+
+                        String userId = jwtUtil.extractUserId(token);
+                        ctx.setUserId(userId != null ? userId : username);
+
+                        // display name — try firstName + lastName from claims
+                        String firstName = jwtUtil.extractFirstName(token);
+                        String lastName  = jwtUtil.extractLastName(token);
+                        if (firstName != null) {
+                            ctx.setUserName(firstName + (lastName != null ? " " + lastName : ""));
+                        } else {
+                            ctx.setUserName(username);
+                        }
+
+                        // IP address — handle proxies
+                        String ip = request.getHeader("X-Forwarded-For");
+                        ctx.setIpAddress(ip != null ? ip.split(",")[0].trim() : request.getRemoteAddr());
+
+                        // User agent
+                        ctx.setUserAgent(request.getHeader("User-Agent"));
+
+                    } catch (Exception e) {
+                        // Never let audit context failure break authentication
+                        logger.warn("Could not populate RequestContext: {}", e);
+                    }
+                    
                 } else {
                     System.out.println(">>> Token invalid!");
                 }
