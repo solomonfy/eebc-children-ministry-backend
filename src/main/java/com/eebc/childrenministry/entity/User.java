@@ -1,5 +1,6 @@
 package com.eebc.childrenministry.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +32,7 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
     @Column(name = "user_name", unique = true)
@@ -48,7 +50,7 @@ public class User {
     private String photoUrl;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'volunteer'")
-    private String role = "volunteer";
+    private String role;
 
     private String status;
 
