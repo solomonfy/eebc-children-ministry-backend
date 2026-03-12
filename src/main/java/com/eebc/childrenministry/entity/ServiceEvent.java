@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ServiceEvent {
+public class ServiceEvent extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;

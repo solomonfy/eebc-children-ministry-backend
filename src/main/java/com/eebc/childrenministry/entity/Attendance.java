@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "attendance")
-public class Attendance {
+public class Attendance extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

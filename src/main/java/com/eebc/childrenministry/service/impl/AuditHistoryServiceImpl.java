@@ -11,6 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,12 @@ public class AuditHistoryServiceImpl implements AuditHistoryService {
             logger.error("Error fetching audit for entity {}: {}", entityName, e.getMessage());
             throw e;
         }
+    }
+
+    // Delegates to getByEntityAndId — satisfies interface overload
+    @Override
+    public Page<AuditHistory> getByEntity(String entityName, String entityId, Pageable pageable) {
+        return getByEntityAndId(entityName, entityId, pageable);
     }
 
     @Override
@@ -79,5 +89,59 @@ public class AuditHistoryServiceImpl implements AuditHistoryService {
     @Override
     public long countByEntityAndId(String entityName, String entityId) {
         return auditRepo.countByEntityNameAndEntityId(entityName, entityId);
+    }
+
+    @Override
+    public Page<AuditHistory> getByEntityIds(
+            String entityName, List<String> entityIds, Pageable pageable) {
+        try {
+            return auditRepo.findByEntityNameAndEntityIdInOrderByChangedAtDesc(
+                    entityName, entityIds, pageable);
+        } catch (Exception e) {
+            logger.error("Error fetching audit for {} ids - {}", entityName, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public Map<String, List<AuditHistory>> getGroupedByEntityIds(
+            String entityName, List<String> entityIds) {
+        try {
+            List<AuditHistory> all = auditRepo
+                    .findByEntityNameAndEntityIdInOrderByChangedAtDesc(entityName, entityIds);
+
+            // Every requested ID gets a key even if it has zero records
+            Map<String, List<AuditHistory>> result = new LinkedHashMap<>();
+            entityIds.forEach(id -> result.put(id, new ArrayList<>()));
+            all.forEach(r -> result.get(r.getEntityId()).add(r));
+
+            logger.info("Grouped audit records for {} - {} ids, {} total records",
+                    entityName, entityIds.size(), all.size());
+            return result;
+        } catch (Exception e) {
+            logger.error("Error grouping audit for {} - {}", entityName, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public Map<String, Long> countGroupedByEntityIds(
+            String entityName, List<String> entityIds) {
+        try {
+            List<AuditHistory> all = auditRepo
+                    .findByEntityNameAndEntityIdInOrderByChangedAtDesc(entityName, entityIds);
+
+            // Seed every requested id with 0 so missing ones still appear in response
+            Map<String, Long> result = new LinkedHashMap<>();
+            entityIds.forEach(id -> result.put(id, 0L));
+            all.forEach(r -> result.merge(r.getEntityId(), 1L, Long::sum));
+
+            logger.info("Counted audit records for {} - {} ids, {} total",
+                    entityName, entityIds.size(), all.size());
+            return result;
+        } catch (Exception e) {
+            logger.error("Error counting grouped audit for {} - {}", entityName, e.getMessage());
+            throw e;
+        }
     }
 }

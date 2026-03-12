@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Child {
+public class Child extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

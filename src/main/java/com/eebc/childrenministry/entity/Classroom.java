@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Classroom {
+public class Classroom extends Auditable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

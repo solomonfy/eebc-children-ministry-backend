@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Profile {
+public class Profile extends Auditable {
     @Id
     @Column(name = "id", nullable = false, length = 36)
     private String id = UUID.randomUUID().toString();

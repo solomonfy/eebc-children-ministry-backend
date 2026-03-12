@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChildAllergy {
+public class ChildAllergy extends Auditable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

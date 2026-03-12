@@ -34,4 +34,16 @@ public interface AuditHistoryRepository extends JpaRepository<AuditHistory, Stri
 
     // Quick count — useful for badges
     long countByEntityNameAndEntityId(String entityName, String entityId);
+
+    // Audit for list of entity IDs (e.g. show all changes for these 10 classrooms)
+    long countByEntityNameAndEntityIdIn(String entityName, List<String> entityIds);
+
+    // Multiple IDs paged
+    Page<AuditHistory> findByEntityNameAndEntityIdInOrderByChangedAtDesc(
+            String entityName, List<String> entityIds, Pageable pageable);
+
+    // Multiple IDs unpaged (for grouping)
+    List<AuditHistory> findByEntityNameAndEntityIdInOrderByChangedAtDesc(
+            String entityName, List<String> entityIds);
+
 }

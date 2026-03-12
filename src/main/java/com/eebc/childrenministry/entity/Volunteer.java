@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Volunteer {
+public class Volunteer extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;

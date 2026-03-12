@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 public interface AuditHistoryService {
 
@@ -26,4 +28,16 @@ public interface AuditHistoryService {
 
     // Count — for badges on detail pages
     long countByEntityAndId(String entityName, String entityId);
+
+    // Overload used by controller when entityId is a single string param
+    Page<AuditHistory> getByEntity(String entityName, String entityId, Pageable pageable);
+
+    // Multiple IDs — flat paged list newest first across all ids
+    Page<AuditHistory> getByEntityIds(String entityName, List<String> entityIds, Pageable pageable);
+
+    // Multiple IDs — grouped map: { "id1": [...records], "id2": [...records] }
+    Map<String, List<AuditHistory>> getGroupedByEntityIds(String entityName, List<String> entityIds);
+
+    // Multiple IDs — count map: { "id1": 3, "id2": 0 }
+    Map<String, Long> countGroupedByEntityIds(String entityName, List<String> entityIds);
 }

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Church {
+public class Church extends Auditable {
 
     @Id
     @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
