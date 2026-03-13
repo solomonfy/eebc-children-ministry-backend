@@ -26,11 +26,15 @@ public class JwtUtil {
     // ── Token generation ───────────────────────
     // userId is now embedded as a claim so audit history
     // and other services can identify who made a change.
-    public String generateToken(String email, String role, String userId) {
+    public String generateToken(String email, String role, String userId,
+                                String firstName, String lastName, String userName) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
-                .claim("userId", userId)        // ← NEW
+                .claim("userId", userId)
+                .claim("firstName", firstName)
+                .claim("lastName", lastName)
+                .claim("userName", userName)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiryMs))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
@@ -38,10 +42,14 @@ public class JwtUtil {
     }
 
     // ── Backwards-compatible overload ─────────
-    // Remove once AuthController is updated to pass userId.
+    @Deprecated
+    public String generateToken(String email, String role, String userId) {
+        return generateToken(email, role, userId, null, null, null);
+    }
+
     @Deprecated
     public String generateToken(String email, String role) {
-        return generateToken(email, role, null);
+        return generateToken(email, role, null, null, null, null);
     }
 
     // ── Claim extraction ───────────────────────
