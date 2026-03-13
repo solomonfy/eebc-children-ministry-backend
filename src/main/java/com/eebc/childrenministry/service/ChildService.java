@@ -1,6 +1,7 @@
 package com.eebc.childrenministry.service;
 
 import com.eebc.childrenministry.dto.ChildDTO;
+import com.eebc.childrenministry.dto.RegisterChildRequest;
 import com.eebc.childrenministry.entity.Child;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface ChildService {
     Optional<ChildDTO> getChildById(String id);
     Optional<ChildDTO> getChildByLastName(String lastName);
     ChildDTO createChild(Child child);
+    Child updateChild(String id, Child child);
+
 }

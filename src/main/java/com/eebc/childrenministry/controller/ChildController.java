@@ -1,6 +1,7 @@
 package com.eebc.childrenministry.controller;
 
 import com.eebc.childrenministry.dto.ChildDTO;
+import com.eebc.childrenministry.dto.RegisterChildRequest;
 import com.eebc.childrenministry.entity.Child;
 import com.eebc.childrenministry.service.ChildService;
 import lombok.RequiredArgsConstructor;
@@ -44,24 +45,12 @@ public class ChildController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    //    @PostMapping
-//    public ResponseEntity<Child> registerChild(@RequestBody RegisterChildRequest req) {
-//        Child child = new Child();
-//        child.setFamilyId(req.familyId());
-//        child.setFirstName(req.firstName());
-//        child.setLastName(req.lastName());
-//        child.setNickname(req.nickname());
-//        child.setBirthDate(req.birthDate());
-//        child.setGender(req.gender());
-//        child.setGrade(req.grade());
-//        child.setSpecialNeeds(req.specialNeeds());
-//        child.setNotes(req.notes());
-//        child.setStatus("ACTIVE");
-//
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(repository.save(child));
-//    }
-//
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> update(@PathVariable String id, @RequestBody RegisterChildRequest req) {
+        return ResponseEntity.ok(null);
+//        return ResponseEntity.ok(childService.updateChild(id, req.));
+    }
+
 //    // Verify PIN at pickup — used by kiosk
 //    @PostMapping("/{id}/verify-pin")
 //    public ResponseEntity<Map<String, Boolean>> verifyPin(

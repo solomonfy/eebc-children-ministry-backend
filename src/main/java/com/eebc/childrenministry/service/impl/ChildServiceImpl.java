@@ -102,6 +102,46 @@ public class ChildServiceImpl implements ChildService {
         return toDTO(saved);
     }
 
+    @Override
+    public Child updateChild(String id, Child child) {
+        try {
+            Optional<Child> existingOpt = childRepository.findById(id);
+            if (existingOpt.isEmpty()) {
+                logger.warn("No child found with ID: {}. Cannot update.", id);
+                return null;
+            }
+            Child existing = existingOpt.get();
+            existing.setFirstName(child.getFirstName());
+            existing.setLastName(child.getLastName());
+            existing.setBirthDate(child.getBirthDate());
+            existing.setFamilyId(child.getFamilyId());
+            existing.setDefaultRoomId(child.getDefaultRoomId());
+            existing.setNickname(child.getNickname());
+            existing.setGender(child.getGender());
+            existing.setGrade(child.getGrade());
+            existing.setPhotoUrl(child.getPhotoUrl());
+            existing.setNotes(child.getNotes());
+            existing.setSpecialNeeds(child.getSpecialNeeds());
+            existing.setEpiPenRequired(child.getEpiPenRequired());
+            existing.setMedicalConditions(child.getMedicalConditions());
+            existing.setMedications(child.getMedications());
+            existing.setStatus(child.getStatus());
+            existing.setEnrolledDate(child.getEnrolledDate());
+
+            // Handle allergies
+            List<ChildAllergy> updatedAllergies = child.getAllergies();
+            if (updatedAllergies != null) {
+                updatedAllergies.forEach(a -> a.setChild(existing));
+                existing.setAllergies(updatedAllergies);
+            }
+
+            return childRepository.save(existing);
+        } catch (Exception e) {
+            logger.error("Error updating child with ID {}: {}", id, e.getMessage());
+            return null;
+        }
+    }
+
     private ChildDTO toDTO(Child child) {
         ChildDTO dto = new ChildDTO();
         dto.setId(child.getId());

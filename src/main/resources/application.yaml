@@ -21,6 +21,7 @@ spring:
       hibernate:
         format_sql: false
         jdbc:
+          time_zone: America/Chicago  # Ensure JPA stores LocalTime / LocalDate correctly in MySQL
           lob:
             non_contextual_creation: true
   docker:
@@ -43,3 +44,9 @@ logging:
 jwt:
   secret: your-super-secret-key-min-32-chars-change-in-production-12345
   expiry: 86400000
+
+## for scheduled service creation
+app:
+  default-campus-id: 550e8400-e29b-41d4-a716-446655440101
+  default-ministry-id: 550e8400-e29b-41d4-a716-446655440201
+

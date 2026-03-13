@@ -174,17 +174,27 @@ public class AuditableEntityListener {
     private String describeAction(Object entity, String action) {
         String name = entity.getClass().getSimpleName();
         return switch (action) {
-            case "INSERT" -> "Added as new";
-            case "DELETE" -> name + " removed";
+            case "INSERT" -> switch (name) {
+                case "Service"         -> "Service created";
+                case "ServiceSchedule" -> "Teacher assigned to service";
+                default                -> "Added as new";
+            };
+            case "DELETE" -> switch (name) {
+                case "Service"         -> "Service deleted";
+                case "ServiceSchedule" -> "Teacher removed from service";
+                default                -> name + " removed";
+            };
             case "UPDATE" -> switch (name) {
-                case "ClassroomTeacher" -> "Teacher assigned";
-                case "RoomAssignment"   -> "Room assigned";
-                case "User"             -> "User updated";
-                case "Room"             -> "Room updated";
-                case "Classroom"        -> "Classroom updated";
-                case "Guardian"         -> "Guardian updated";
-                case "Child"            -> "Child updated";
-                default                 -> name + " updated";
+                case "ClassroomTeacher"  -> "Teacher assigned";
+                case "RoomAssignment"    -> "Room assigned";
+                case "User"              -> "User updated";
+                case "Room"              -> "Room updated";
+                case "Classroom"         -> "Classroom updated";
+                case "Guardian"          -> "Guardian updated";
+                case "Child"             -> "Child updated";
+                case "Service"           -> "Service updated";
+                case "ServiceSchedule"   -> "Assignment updated";
+                default                  -> name + " updated";
             };
             default -> action;
         };
