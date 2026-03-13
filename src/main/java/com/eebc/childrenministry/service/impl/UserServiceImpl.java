@@ -266,6 +266,10 @@ public class UserServiceImpl implements UserService {
                 user.setUserName(updates.getUserName());
             }
 
+            // Notification preferences
+            if (updates.getNotifyEmail() != null) user.setNotifyEmail(updates.getNotifyEmail());
+            if (updates.getNotifySms()   != null) user.setNotifySms(updates.getNotifySms());
+
             // Password — only update if a new one is explicitly provided
             if (updates.getPasswordHash() != null && !updates.getPasswordHash().isBlank())
                 user.setPasswordHash(passwordEncoder.encode(updates.getPasswordHash()));

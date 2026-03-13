@@ -11,5 +11,7 @@ public record UserResponse(
         String phone,
         String photoUrl,
         String role,
-        String status
+        String status,
+        Boolean notifyEmail,
+        Boolean notifySms
 ) {}

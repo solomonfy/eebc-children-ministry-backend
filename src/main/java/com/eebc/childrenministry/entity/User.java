@@ -54,6 +54,14 @@ public class User  extends Auditable {
 
     private String status;
 
+    /** true = receive email notifications (default true) */
+    @Column(name = "notify_email", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean notifyEmail = true;
+
+    /** true = receive SMS notifications (default true) */
+    @Column(name = "notify_sms", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean notifySms = true;
+
     @CreationTimestamp
     private LocalDateTime created_at = LocalDateTime.now();
 

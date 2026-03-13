@@ -6,6 +6,20 @@ server:
 spring:
   application:
     name: eebc-children-ministry-backend
+
+  ## Email notifications (Spring Mail)
+  ## Set MAIL_USERNAME + MAIL_PASSWORD env vars to enable.
+  ## For Gmail: enable App Password in Google Account settings.
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+
   datasource:
     url: "jdbc:mysql://localhost:3306/eebc-children-ministry?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
     username: root
@@ -44,6 +58,11 @@ logging:
 jwt:
   secret: your-super-secret-key-min-32-chars-change-in-production-12345
   expiry: 86400000
+
+
+
+notification:
+  from-name: "EEBC Children's Ministry"
 
 ## for scheduled service creation
 app:

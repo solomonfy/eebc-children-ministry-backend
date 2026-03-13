@@ -32,7 +32,9 @@ public class UserController {
                 u.getPhone(),
                 u.getPhotoUrl(),
                 u.getRole(),
-                u.getStatus()
+                u.getStatus(),
+                u.getNotifyEmail() != null ? u.getNotifyEmail() : true,
+                u.getNotifySms()   != null ? u.getNotifySms()   : true
         );
     }
 

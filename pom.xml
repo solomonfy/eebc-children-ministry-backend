@@ -88,6 +88,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Spring Mail (email notifications) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- JWT (JJWT) -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -106,6 +112,11 @@
 			<version>0.12.3</version>
 			<scope>runtime</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>5.3.23</version>
+        </dependency>
 
     </dependencies>
 

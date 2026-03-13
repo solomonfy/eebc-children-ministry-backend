@@ -6,6 +6,7 @@ import com.eebc.childrenministry.entity.Service;
 import com.eebc.childrenministry.entity.ServiceSchedule;
 import com.eebc.childrenministry.repository.ServiceRepository;
 import com.eebc.childrenministry.repository.ServiceScheduleRepository;
+import com.eebc.childrenministry.service.NotificationService;
 import com.eebc.childrenministry.service.ServiceService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class ServiceServiceImpl implements ServiceService {
 
     private final ServiceRepository          serviceRepo;
     private final ServiceScheduleRepository  scheduleRepo;
+    private final NotificationService        notificationService;
 
     // ── Services ──────────────────────────────────────────────────────────
 
@@ -183,6 +185,11 @@ public class ServiceServiceImpl implements ServiceService {
             ServiceSchedule saved = scheduleRepo.save(assignment);
             logger.info("Assigned teacher {} to classroom {} for service {}",
                     req.teacherId(), req.classroomId(), req.serviceId());
+
+            // Fire-and-forget notification (exceptions caught inside)
+            try { notificationService.sendAssignmentNotification(saved); }
+            catch (Exception e) { logger.warn("Notification failed (non-fatal): {}", e.getMessage()); }
+
             return saved;
         } catch (Exception e) {
             logger.error("Error assigning teacher: {}", e.getMessage());

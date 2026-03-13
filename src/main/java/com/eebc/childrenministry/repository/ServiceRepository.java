@@ -33,4 +33,6 @@ public interface ServiceRepository extends JpaRepository<Service, String> {
             LocalDate serviceDate, String type, String campusId);
 
     List<Service> findByType(String type);
+
+    List<Service> findByServiceDate(LocalDate serviceDate);
 }
