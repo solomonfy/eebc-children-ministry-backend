@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -90,8 +91,9 @@ public class NotificationServiceImpl implements NotificationService {
                 if (teacher == null) continue;
 
                 String classroomName = classroom != null ? classroom.getName() : "your classroom";
-                String subject = "Reminder: You're serving at " + service.getName();
-                String body = buildReminderBody(teacher.getFirstName(), service, classroomName);
+                String timing = timingPhrase(service.getServiceDate(), service.getType());
+                String subject = "Reminder: You're serving " + timing + " — " + service.getName();
+                String body = buildReminderBody(teacher.getFirstName(), service, classroomName, timing);
 
                 sendEmail(teacher, service, classroomName, subject, body, "REMINDER");
                 sendSms(teacher, service, classroomName, "REMINDER");
@@ -224,14 +226,43 @@ public class NotificationServiceImpl implements NotificationService {
 
     private String buildReminderBody(String firstName,
                                      com.eebc.childrenministry.entity.Service service,
-                                     String classroomName) {
+                                     String classroomName,
+                                     String timing) {
         return "Hi " + firstName + ",\n\n"
-                + "This is a reminder that you're scheduled to serve tomorrow.\n\n"
+                + "This is a reminder that you're scheduled to serve " + timing + ".\n\n"
                 + "Service:   " + service.getName() + "\n"
                 + "Date:      " + service.getServiceDate() + "\n"
                 + "Time:      " + service.getStartTime() + " – " + service.getEndTime() + "\n"
                 + "Classroom: " + classroomName + "\n\n"
                 + "Thank you for your service!\n\n"
                 + fromName;
+    }
+
+    /**
+     * Returns a human-friendly timing phrase based on how far the service date is from today.
+     * Examples:
+     *   today  + FRIDAY_EVENING  → "tonight"
+     *   today  + SUNDAY_MORNING  → "this morning"
+     *   tomorrow                 → "tomorrow"
+     *   within 7 days            → "this Friday" / "this Sunday"
+     *   further out              → "on Friday, June 20"
+     */
+    private String timingPhrase(LocalDate serviceDate, String serviceType) {
+        if (serviceDate == null) return "at the upcoming service";
+        LocalDate today = LocalDate.now();
+        long daysAway = today.until(serviceDate).getDays();
+
+        if (daysAway == 0) {
+            return "FRIDAY_EVENING".equals(serviceType) ? "tonight" : "this morning";
+        }
+        if (daysAway == 1) {
+            return "tomorrow";
+        }
+        if (daysAway > 1 && daysAway <= 7) {
+            String dayName = serviceDate.getDayOfWeek()
+                    .getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.ENGLISH);
+            return "this " + dayName;
+        }
+        return "on " + serviceDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"));
     }
 }
