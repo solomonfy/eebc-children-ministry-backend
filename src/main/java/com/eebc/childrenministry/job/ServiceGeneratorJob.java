@@ -50,8 +50,25 @@ public class ServiceGeneratorJob {
             long total = serviceRepo.count();
             logger.info("=== SERVICE SEED COMPLETE: {} total services in DB ===", total);
         } catch (Exception e) {
-            // Never crash startup — log and move on
             logger.error("SERVICE SEED FAILED (non-fatal): {}", e.getMessage(), e);
+        }
+
+        // Mark any past services as COMPLETED on startup
+        try {
+            int updated = serviceService.markPastServicesCompleted();
+            if (updated > 0)
+                logger.info("=== STARTUP: marked {} past service(s) as COMPLETED ===", updated);
+        } catch (Exception e) {
+            logger.error("markPastServicesCompleted on startup failed (non-fatal): {}", e.getMessage(), e);
+        }
+
+        // Mark today's services as ACTIVE on startup
+        try {
+            int updated = serviceService.markTodayServicesActive();
+            if (updated > 0)
+                logger.info("=== STARTUP: marked {} today's service(s) as ACTIVE ===", updated);
+        } catch (Exception e) {
+            logger.error("markTodayServicesActive on startup failed (non-fatal): {}", e.getMessage(), e);
         }
     }
 
@@ -67,11 +84,30 @@ public class ServiceGeneratorJob {
     public void weeklyGeneration() {
         logger.info("=== WEEKLY CRON: generating next Friday + Sunday services ===");
         try {
-            // weeksAhead=1 → only the immediately upcoming Friday+Sunday
             serviceService.generateWeek(1, defaultCampusId, defaultMinistryId);
             logger.info("=== WEEKLY CRON COMPLETE ===");
         } catch (Exception e) {
             logger.error("WEEKLY CRON FAILED: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Daily at midnight CST — marks any services whose date has passed as COMPLETED.
+     */
+    @Scheduled(cron = "0 0 0 * * ?", zone = "America/Chicago")
+    public void dailyStatusUpdate() {
+        logger.info("=== DAILY STATUS UPDATE: marking past services as COMPLETED, today's as ACTIVE ===");
+        try {
+            int completed = serviceService.markPastServicesCompleted();
+            logger.info("=== DAILY: marked {} past service(s) as COMPLETED ===", completed);
+        } catch (Exception e) {
+            logger.error("DAILY markPastServicesCompleted FAILED: {}", e.getMessage(), e);
+        }
+        try {
+            int active = serviceService.markTodayServicesActive();
+            logger.info("=== DAILY: marked {} today's service(s) as ACTIVE ===", active);
+        } catch (Exception e) {
+            logger.error("DAILY markTodayServicesActive FAILED: {}", e.getMessage(), e);
         }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +32,9 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationLogRepository notificationLogRepo;
 
     // Optional — null if spring.mail.username is not configured
+//    @Autowired(required = false)
+//    private MailSender mailSender;
+
     @Autowired(required = false)
     private JavaMailSender mailSender;
 

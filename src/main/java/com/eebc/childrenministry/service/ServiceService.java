@@ -42,4 +42,16 @@ public interface ServiceService {
      * Safe to call multiple times — idempotent via existsByServiceDateAndTypeAndCampusId.
      */
     void seedNextWeeks(int weeks, String campusId, String ministryId);
+
+    /**
+     * Marks all SCHEDULED or ACTIVE services whose serviceDate < today as COMPLETED.
+     * Called by the daily cron job and on startup.
+     */
+    int markPastServicesCompleted();
+
+    /**
+     * Marks all SCHEDULED services whose serviceDate == today as ACTIVE.
+     * Called on startup and by the daily cron job.
+     */
+    int markTodayServicesActive();
 }

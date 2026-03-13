@@ -35,4 +35,8 @@ public interface ServiceRepository extends JpaRepository<Service, String> {
     List<Service> findByType(String type);
 
     List<Service> findByServiceDate(LocalDate serviceDate);
+
+    List<Service> findByServiceDateBeforeAndStatusIn(LocalDate date, List<String> statuses);
+
+    List<Service> findByServiceDateAndStatusIn(LocalDate date, List<String> statuses);
 }

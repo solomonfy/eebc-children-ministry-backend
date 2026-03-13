@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -311,6 +312,32 @@ public class ServiceServiceImpl implements ServiceService {
         s.setCampusId(req.campusId());
         s.setMinistryId(req.ministryId());
         return s;
+    }
+
+    @Override
+    public int markPastServicesCompleted() {
+        List<com.eebc.childrenministry.entity.Service> past =
+                serviceRepo.findByServiceDateBeforeAndStatusIn(
+                        LocalDate.now(),
+                        Arrays.asList("SCHEDULED", "ACTIVE"));
+        if (past.isEmpty()) return 0;
+        past.forEach(s -> s.setStatus("COMPLETED"));
+        serviceRepo.saveAll(past);
+        logger.info("Marked {} past service(s) as COMPLETED", past.size());
+        return past.size();
+    }
+
+    @Override
+    public int markTodayServicesActive() {
+        List<com.eebc.childrenministry.entity.Service> today =
+                serviceRepo.findByServiceDateAndStatusIn(
+                        LocalDate.now(),
+                        Arrays.asList("SCHEDULED"));
+        if (today.isEmpty()) return 0;
+        today.forEach(s -> s.setStatus("ACTIVE"));
+        serviceRepo.saveAll(today);
+        logger.info("Marked {} today's service(s) as ACTIVE", today.size());
+        return today.size();
     }
 
     private String defaultName(String type) {
