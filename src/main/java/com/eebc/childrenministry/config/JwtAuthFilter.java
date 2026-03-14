@@ -71,6 +71,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             ctx.setUserName(username);
                         }
 
+                        // Campus / church / role for data scoping
+                        ctx.setCampusId(jwtUtil.extractCampusId(token));
+                        ctx.setChurchId(jwtUtil.extractChurchId(token));
+                        ctx.setRole(role);
+
                         // IP address — handle proxies
                         String ip = request.getHeader("X-Forwarded-For");
                         ctx.setIpAddress(ip != null ? ip.split(",")[0].trim() : request.getRemoteAddr());

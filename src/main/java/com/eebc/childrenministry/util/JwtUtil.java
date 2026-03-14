@@ -24,10 +24,9 @@ public class JwtUtil {
     }
 
     // ── Token generation ───────────────────────
-    // userId is now embedded as a claim so audit history
-    // and other services can identify who made a change.
     public String generateToken(String email, String role, String userId,
-                                String firstName, String lastName, String userName) {
+                                String firstName, String lastName, String userName,
+                                String campusId, String churchId) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
@@ -35,21 +34,29 @@ public class JwtUtil {
                 .claim("firstName", firstName)
                 .claim("lastName", lastName)
                 .claim("userName", userName)
+                .claim("campusId", campusId)
+                .claim("churchId", churchId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiryMs))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // ── Backwards-compatible overload ─────────
+    // ── Backwards-compatible overloads ────────
+    @Deprecated
+    public String generateToken(String email, String role, String userId,
+                                String firstName, String lastName, String userName) {
+        return generateToken(email, role, userId, firstName, lastName, userName, null, null);
+    }
+
     @Deprecated
     public String generateToken(String email, String role, String userId) {
-        return generateToken(email, role, userId, null, null, null);
+        return generateToken(email, role, userId, null, null, null, null, null);
     }
 
     @Deprecated
     public String generateToken(String email, String role) {
-        return generateToken(email, role, null, null, null, null);
+        return generateToken(email, role, null, null, null, null, null, null);
     }
 
     // ── Claim extraction ───────────────────────
@@ -93,5 +100,13 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return extractAllClaims(token).get("userName", String.class);
+    }
+
+    public String extractCampusId(String token) {
+        return extractAllClaims(token).get("campusId", String.class);
+    }
+
+    public String extractChurchId(String token) {
+        return extractAllClaims(token).get("churchId", String.class);
     }
 }

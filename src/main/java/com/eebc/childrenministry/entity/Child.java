@@ -47,6 +47,9 @@ public class Child extends Auditable {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Column(name = "campus_id", columnDefinition = "CHAR(36)")
+    private String campusId;
+
     @Column(name = "default_room_id", columnDefinition = "CHAR(36)")
     private String defaultRoomId;
 

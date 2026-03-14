@@ -67,7 +67,9 @@ public class AuthService {
         u.setStatus(Status.ACTIVE.name());
         u.setEmail(req.email());
         u.setPasswordHash(hash);
-        u.setRole(req.role());
+        u.setRole(req.role().toUpperCase());
+        u.setCampusId(req.campusId());
+        u.setChurchId(req.churchId());
         u.setUserName(generateUserName(req));
         logger.info("Registering new user with email {}", req.email());
         userRepository.save(u);
@@ -83,7 +85,8 @@ public class AuthService {
         }
         logger.info("User {} logged in successfully", req.email());
         return jwtUtil.generateToken(u.getEmail(), u.getRole(), u.getId(),
-                u.getFirstName(), u.getLastName(), u.getUserName());
+                u.getFirstName(), u.getLastName(), u.getUserName(),
+                u.getCampusId(), u.getChurchId());
     }
 
     // 2. Generate username

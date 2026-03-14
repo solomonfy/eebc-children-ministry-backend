@@ -60,6 +60,9 @@ public class Guardian extends Auditable {
     @Column(name = "pin_set_at")
     private LocalDateTime pinSetAt;
 
+    @Column(name = "campus_id", columnDefinition = "VARCHAR(36)")
+    private String campusId;
+
     @Column(name = "photo_url")
     private String photoUrl;
 

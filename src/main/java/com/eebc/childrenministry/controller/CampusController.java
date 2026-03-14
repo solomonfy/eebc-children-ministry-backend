@@ -1,14 +1,11 @@
 package com.eebc.childrenministry.controller;
 
+import com.eebc.childrenministry.config.RequestContext;
 import com.eebc.childrenministry.entity.Campus;
 import com.eebc.childrenministry.repository.CampusRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,14 +15,24 @@ import java.util.List;
 public class CampusController {
 
     private final CampusRepository campusRepository;
+    private final RequestContext requestContext;
 
     @GetMapping
     public ResponseEntity<List<Campus>> list() {
         return ResponseEntity.ok(campusRepository.findAll());
     }
 
+    @GetMapping("/current")
+    public ResponseEntity<Campus> getCurrent() {
+        String campusId = requestContext.getCampusId();
+        if (campusId == null) return ResponseEntity.notFound().build();
+        return campusRepository.findById(campusId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Campus> getById(@RequestBody String id) {
+    public ResponseEntity<Campus> getById(@PathVariable String id) {
         return campusRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

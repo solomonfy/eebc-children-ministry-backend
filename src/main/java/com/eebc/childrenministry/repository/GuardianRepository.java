@@ -12,6 +12,8 @@ public interface GuardianRepository extends JpaRepository<Guardian, String> {
     List<Guardian> findByFamilyId(String familyId);
     List<Guardian> findByFamilyIdAndAllowedPickupTrue(String familyId);
     Optional<Guardian> findByUserId(String userId);
+    List<Guardian> findAllByCampusId(String campusId);
+    Optional<Guardian> findByIdAndCampusId(String id, String campusId);
 
     // Find all guardians that have a PIN set
     // Used during kiosk PIN lookup

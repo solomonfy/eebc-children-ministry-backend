@@ -52,6 +52,12 @@ public class User  extends Auditable {
     @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'volunteer'")
     private String role;
 
+    @Column(name = "campus_id", columnDefinition = "VARCHAR(36)")
+    private String campusId;
+
+    @Column(name = "church_id", columnDefinition = "VARCHAR(36)")
+    private String churchId;
+
     private String status;
 
     /** true = receive email notifications (default true) */

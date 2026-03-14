@@ -1,5 +1,6 @@
 package com.eebc.childrenministry.service.impl;
 
+import com.eebc.childrenministry.config.RequestContext;
 import com.eebc.childrenministry.entity.Family;
 import com.eebc.childrenministry.repository.FamilyRepository;
 import com.eebc.childrenministry.service.FamilyService;
@@ -21,17 +22,25 @@ public class FamilyServiceImpl implements FamilyService {
     @Autowired
     FamilyRepository familyRepository;
 
+    @Autowired
+    RequestContext requestContext;
+
     private static final Logger logger = LoggerFactory.getLogger(FamilyServiceImpl.class);
+
+    private boolean isSuperAdmin() {
+        return "SUPER_ADMIN".equals(requestContext.getRole());
+    }
 
     @Override
     public List<Family> getAllFamilies() {
-        List<Family> familyList = new ArrayList<>();
         try {
-            familyList = familyRepository.findAll();
-            logger.info("Retrieved {} families from the repository.", familyList);
+            List<Family> familyList = isSuperAdmin()
+                    ? familyRepository.findAll()
+                    : familyRepository.findAllByCampusId(requestContext.getCampusId());
+            logger.info("Retrieved {} families.", familyList.size());
             return familyList;
         } catch (Exception e) {
-            logger.error("Error retrieving churches from the repository: {}", e.getMessage());
+            logger.error("Error retrieving families: {}", e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -39,7 +48,9 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public Optional<Family> getFamilyById(String id) {
         try {
-            Optional<Family> family = familyRepository.findById(id);
+            Optional<Family> family = isSuperAdmin()
+                    ? familyRepository.findById(id)
+                    : familyRepository.findByIdAndCampusId(id, requestContext.getCampusId());
             if (family.isEmpty()) {
                 logger.warn("No family found with ID: {}", id);
             } else {
@@ -76,6 +87,7 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public Family createFamily(Family family) {
         try {
+            if (!isSuperAdmin()) family.setCampusId(requestContext.getCampusId());
             if (family.getStatus() == null) family.setStatus("ACTIVE");
             Family saved = familyRepository.save(family);
             logger.info("Created family with ID: {}", saved.getId());
@@ -89,7 +101,9 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public Family updateFamily(String id, Family req) {
         try {
-            Family existing = familyRepository.findById(id)
+            Family existing = (isSuperAdmin()
+                    ? familyRepository.findById(id)
+                    : familyRepository.findByIdAndCampusId(id, requestContext.getCampusId()))
                     .orElseThrow(() -> new RuntimeException("Family not found: " + id));
             if (req.getLastName() != null)                     existing.setLastName(req.getLastName());
             if (req.getPhone() != null)                        existing.setPhone(req.getPhone());

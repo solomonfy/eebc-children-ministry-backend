@@ -1,6 +1,7 @@
 package com.eebc.childrenministry.entity;
 
 public enum AppRole {
+    SUPER_ADMIN,        // Cross-campus, church-wide visibility
     DIRECTOR,
     ADMIN,
     STAFF,

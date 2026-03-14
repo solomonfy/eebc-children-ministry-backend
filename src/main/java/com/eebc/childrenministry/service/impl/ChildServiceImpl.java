@@ -1,5 +1,6 @@
 package com.eebc.childrenministry.service.impl;
 
+import com.eebc.childrenministry.config.RequestContext;
 import com.eebc.childrenministry.dto.ChildDTO;
 import com.eebc.childrenministry.dto.RegisterChildRequest;
 import com.eebc.childrenministry.entity.Child;
@@ -27,18 +28,25 @@ public class ChildServiceImpl implements ChildService {
     private final ChildRepository childRepository;
     private final FamilyRepository familyRepository;
     private final RoomRepository roomRepository;
+    private final RequestContext requestContext;
 
     private static final Logger logger = LoggerFactory.getLogger(ChildServiceImpl.class);
+
+    private boolean isSuperAdmin() {
+        return "SUPER_ADMIN".equals(requestContext.getRole());
+    }
 
     @Override
     @Transactional(readOnly = true)
     public List<ChildDTO> getAllChildren() {
         try {
-            List<ChildDTO> children = childRepository.findAllWithAllergies()
+            List<ChildDTO> children = (isSuperAdmin()
+                    ? childRepository.findAllWithAllergies()
+                    : childRepository.findAllWithAllergiesByCampusId(requestContext.getCampusId()))
                     .stream()
                     .map(this::toDTO)
                     .collect(Collectors.toList());
-            logger.info("Retrieved {} children from the repository.", children.size());
+            logger.info("Retrieved {} children.", children.size());
             return children;
         } catch (Exception e) {
             logger.error("Error retrieving children: {}", e.getMessage());
@@ -70,7 +78,9 @@ public class ChildServiceImpl implements ChildService {
     @Transactional(readOnly = true)
     public Optional<ChildDTO> getChildById(String id) {
         try {
-            return childRepository.findByIdWithAllergies(id)
+            return (isSuperAdmin()
+                    ? childRepository.findByIdWithAllergies(id)
+                    : childRepository.findByIdWithAllergiesAndCampusId(id, requestContext.getCampusId()))
                     .map(this::toDTO);
         } catch (Exception e) {
             logger.error("Error retrieving child with ID {}: {}", id, e.getMessage());
@@ -103,7 +113,8 @@ public class ChildServiceImpl implements ChildService {
 
     @Override
     public ChildDTO createChild(Child child) {
-        // Auto-assign default classroom by age if not already set
+        if (!isSuperAdmin()) child.setCampusId(requestContext.getCampusId());
+        // Auto-assign default room by age if not already set
         if (child.getDefaultRoomId() == null && child.getBirthDate() != null) {
             int ageMonths = (int) ChronoUnit.MONTHS.between(child.getBirthDate(), java.time.LocalDate.now());
             roomRepository.findByAgeInMonths(ageMonths).stream()

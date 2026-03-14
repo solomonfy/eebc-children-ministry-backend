@@ -38,6 +38,9 @@ public class Family extends Auditable{
     private String communication_method;
 //    private String address;
 
+    @Column(name = "campus_id", columnDefinition = "VARCHAR(36)")
+    private String campusId;
+
     private String status;
     private LocalDateTime created_at = LocalDateTime.now();
     private LocalDateTime updated_at = LocalDateTime.now();

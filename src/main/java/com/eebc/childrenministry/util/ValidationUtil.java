@@ -1,7 +1,10 @@
 package com.eebc.childrenministry.util;
 
+import com.eebc.childrenministry.entity.AppRole;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.regex.Pattern;
 @Component
 public class ValidationUtil {
@@ -38,10 +41,15 @@ public class ValidationUtil {
         if (role == null || role.isBlank()) {
             return "Role cannot be empty";
         }
-        if (!role.matches("admin|staff|volunteer")) {
-            return "Role must be one of: admin, staff, volunteer";
+        try {
+            AppRole.valueOf(role.toUpperCase());
+            return null;
+        } catch (IllegalArgumentException e) {
+            String valid = Arrays.stream(AppRole.values())
+                    .map(r -> r.name().toLowerCase())
+                    .collect(Collectors.joining(", "));
+            return "Role must be one of: " + valid;
         }
-        return null;
     }
 
     public String validateUserName(String user_name) {
