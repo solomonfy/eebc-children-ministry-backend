@@ -16,6 +16,12 @@ public class MinistrySettingController {
     @Autowired
     private MinistrySettingService service;
 
+    @GetMapping
+    public ResponseEntity<MinistrySetting> listAll() {
+        return ResponseEntity.ok(service.getAllSettings());
+    }
+
+
     // GET  /ministry-settings/{ministryId}
     // Returns settings for a ministry, auto-creating defaults if none exist
     @GetMapping("/{ministryId}")

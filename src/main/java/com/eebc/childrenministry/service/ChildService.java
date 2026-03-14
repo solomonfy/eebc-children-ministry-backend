@@ -15,5 +15,6 @@ public interface ChildService {
     Optional<ChildDTO> getChildByLastName(String lastName);
     ChildDTO createChild(Child child);
     Child updateChild(String id, Child child);
+    ChildDTO updateChild(String id, RegisterChildRequest req);
 
 }

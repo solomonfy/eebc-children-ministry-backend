@@ -1,7 +1,6 @@
 package com.eebc.childrenministry.controller;
 
 import com.eebc.childrenministry.entity.Guardian;
-import com.eebc.childrenministry.repository.GuardianRepository;
 import com.eebc.childrenministry.service.GuardianService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,18 +16,26 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GuardianController {
 
-    private final GuardianRepository repository;
     private final GuardianService guardianService;
 
     @GetMapping
     public ResponseEntity<List<Guardian>> list() {
-        return ResponseEntity.ok(repository.findAll());
+        return ResponseEntity.ok(guardianService.getAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Guardian> getById(@PathVariable String id) {
+        return ResponseEntity.ok(guardianService.getGuardianById(id));
     }
 
     @PostMapping
     public ResponseEntity<Guardian> create(@RequestBody Guardian g) {
-        Guardian saved = repository.save(g);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(guardianService.create(g));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Guardian> update(@PathVariable String id, @RequestBody Guardian req) {
+        return ResponseEntity.ok(guardianService.update(id, req));
     }
 
     @PostMapping("/{id}/pin")

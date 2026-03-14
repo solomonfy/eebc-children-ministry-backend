@@ -14,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceController {
 
-    private final AttendanceRepository repository;
     private final AttendanceService attendanceService;
 
     @GetMapping

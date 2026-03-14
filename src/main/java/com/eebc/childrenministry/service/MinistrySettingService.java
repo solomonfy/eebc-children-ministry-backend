@@ -14,6 +14,15 @@ public class MinistrySettingService {
     @Autowired
     private MinistrySettingRepository repo;
 
+    public MinistrySetting getAllSettings() {
+        try {
+            return repo.findAll().stream().findFirst()
+                    .orElseGet(() -> createDefaults("default"));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching settings", e);
+        }
+    }
+
     // ── Get or auto-create defaults ────────────
     public MinistrySetting getByMinistryId(String ministryId) {
         final MinistrySetting ministrySetting = repo.findByMinistryId(ministryId)
@@ -98,4 +107,6 @@ public class MinistrySettingService {
         s.setParentRecapsEnabled(true);
         s.setIncidentsEnabled(true);
     }
+
+
 }

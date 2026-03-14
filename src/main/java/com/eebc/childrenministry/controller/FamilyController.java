@@ -1,14 +1,13 @@
 package com.eebc.childrenministry.controller;
 
 import com.eebc.childrenministry.entity.Family;
-import com.eebc.childrenministry.repository.FamilyRepository;
 import com.eebc.childrenministry.service.FamilyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/families")
@@ -23,7 +22,7 @@ public class FamilyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Family>> getById(@RequestBody String id) {
+    public ResponseEntity<Family> getById(@PathVariable String id) {
         return familyService.getFamilyById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -38,7 +37,11 @@ public class FamilyController {
 
     @PostMapping
     public ResponseEntity<Family> create(@RequestBody Family f) {
-        Family saved = familyService.createFamily(f);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(familyService.createFamily(f));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Family> update(@PathVariable String id, @RequestBody Family req) {
+        return ResponseEntity.ok(familyService.updateFamily(id, req));
     }
 }

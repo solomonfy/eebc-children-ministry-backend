@@ -37,19 +37,19 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public Optional<Optional<Family>> getFamilyById(String id) {
+    public Optional<Family> getFamilyById(String id) {
         try {
             Optional<Family> family = familyRepository.findById(id);
-            if (family == null) {
+            if (family.isEmpty()) {
                 logger.warn("No family found with ID: {}", id);
-                return Optional.empty();
+            } else {
+                logger.info("Retrieved family with ID: {}", id);
             }
-            logger.info("Retrieved family: {} with ID: {}", family, id);
-            return Optional.of(family);
+            return family;
         } catch (Exception e) {
             logger.error("Error retrieving family with ID {}: {}", id, e.getMessage());
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     @Override
@@ -75,6 +75,38 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public Family createFamily(Family family) {
-        return null;
+        try {
+            if (family.getStatus() == null) family.setStatus("ACTIVE");
+            Family saved = familyRepository.save(family);
+            logger.info("Created family with ID: {}", saved.getId());
+            return saved;
+        } catch (Exception e) {
+            logger.error("Error creating family: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public Family updateFamily(String id, Family req) {
+        try {
+            Family existing = familyRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Family not found: " + id));
+            if (req.getLastName() != null)                     existing.setLastName(req.getLastName());
+            if (req.getPhone() != null)                        existing.setPhone(req.getPhone());
+            if (req.getEmail() != null)                        existing.setEmail(req.getEmail());
+            if (req.getEmergency_contact_name() != null)       existing.setEmergency_contact_name(req.getEmergency_contact_name());
+            if (req.getEmergency_contact_relationship() != null) existing.setEmergency_contact_relationship(req.getEmergency_contact_relationship());
+            if (req.getNotes() != null)                        existing.setNotes(req.getNotes());
+            if (req.getCommunication_method() != null)         existing.setCommunication_method(req.getCommunication_method());
+            if (req.getFirst_visit_date() != null)             existing.setFirst_visit_date(req.getFirst_visit_date());
+            if (req.getStatus() != null)                       existing.setStatus(req.getStatus());
+            existing.setUpdated_at(java.time.LocalDateTime.now());
+            Family saved = familyRepository.save(existing);
+            logger.info("Updated family with ID: {}", id);
+            return saved;
+        } catch (Exception e) {
+            logger.error("Error updating family with ID {}: {}", id, e.getMessage());
+            throw e;
+        }
     }
 }

@@ -1,16 +1,20 @@
 package com.eebc.childrenministry.service.impl;
 
 import com.eebc.childrenministry.dto.ChildDTO;
+import com.eebc.childrenministry.dto.RegisterChildRequest;
 import com.eebc.childrenministry.entity.Child;
 import com.eebc.childrenministry.entity.ChildAllergy;
 import com.eebc.childrenministry.repository.ChildRepository;
 import com.eebc.childrenministry.repository.FamilyRepository;
+import com.eebc.childrenministry.repository.RoomRepository;
 import com.eebc.childrenministry.service.ChildService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.temporal.ChronoUnit;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +26,7 @@ public class ChildServiceImpl implements ChildService {
 
     private final ChildRepository childRepository;
     private final FamilyRepository familyRepository;
+    private final RoomRepository roomRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(ChildServiceImpl.class);
 
@@ -98,6 +103,13 @@ public class ChildServiceImpl implements ChildService {
 
     @Override
     public ChildDTO createChild(Child child) {
+        // Auto-assign default classroom by age if not already set
+        if (child.getDefaultRoomId() == null && child.getBirthDate() != null) {
+            int ageMonths = (int) ChronoUnit.MONTHS.between(child.getBirthDate(), java.time.LocalDate.now());
+            roomRepository.findByAgeInMonths(ageMonths).stream()
+                    .findFirst()
+                    .ifPresent(r -> child.setDefaultRoomId(r.getId()));
+        }
         Child saved = childRepository.save(child);
         return toDTO(saved);
     }
@@ -134,8 +146,36 @@ public class ChildServiceImpl implements ChildService {
                 updatedAllergies.forEach(a -> a.setChild(existing));
                 existing.setAllergies(updatedAllergies);
             }
+            logger.info("Payload sent {}: ", child.toString());
+            logger.info("updating child with ID {}: {}", id, existing);
 
             return childRepository.save(existing);
+        } catch (Exception e) {
+            logger.error("Error updating child with ID {}: {}", id, e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public ChildDTO updateChild(String id, RegisterChildRequest req) {
+        try {
+            Optional<Child> existingOpt = childRepository.findByIdWithAllergies(id);
+            if (existingOpt.isEmpty()) {
+                logger.warn("No child found with ID: {}. Cannot update.", id);
+                return null;
+            }
+            Child existing = existingOpt.get();
+            if (req.familyId()       != null) existing.setFamilyId(req.familyId());
+            if (req.firstName()      != null) existing.setFirstName(req.firstName());
+            if (req.lastName()       != null) existing.setLastName(req.lastName());
+            if (req.nickname()       != null) existing.setNickname(req.nickname());
+            if (req.birthDate()      != null) existing.setBirthDate(req.birthDate());
+            if (req.gender()         != null) existing.setGender(req.gender());
+            if (req.grade()          != null) existing.setGrade(req.grade());
+            if (req.specialNeeds()   != null) existing.setSpecialNeeds(req.specialNeeds());
+            if (req.notes()          != null) existing.setNotes(req.notes());
+            if (req.defaultRoomId()  != null) existing.setDefaultRoomId(req.defaultRoomId());
+            return toDTO(childRepository.save(existing));
         } catch (Exception e) {
             logger.error("Error updating child with ID {}: {}", id, e.getMessage());
             return null;

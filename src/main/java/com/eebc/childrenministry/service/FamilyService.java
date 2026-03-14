@@ -7,8 +7,9 @@ import java.util.Optional;
 
 public interface FamilyService {
     List<Family> getAllFamilies();
-    Optional<Optional<Family>> getFamilyById(String id);
+    Optional<Family> getFamilyById(String id);
     Optional<Family> getFamilyByName(String name);
     Optional<Family> getFamilyByPin(String pin);
     Family createFamily(Family family);
+    Family updateFamily(String id, Family family);
 }

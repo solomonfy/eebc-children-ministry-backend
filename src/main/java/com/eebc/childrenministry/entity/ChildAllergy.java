@@ -1,5 +1,6 @@
 package com.eebc.childrenministry.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,6 +23,7 @@ public class ChildAllergy extends Auditable{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_id", columnDefinition = "CHAR(36)", nullable = false)
+    @JsonIgnore
     private Child child;
 
     @Column(name = "name", nullable = false)

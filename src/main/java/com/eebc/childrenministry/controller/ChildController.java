@@ -46,9 +46,9 @@ public class ChildController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable String id, @RequestBody RegisterChildRequest req) {
-        return ResponseEntity.ok(null);
-//        return ResponseEntity.ok(childService.updateChild(id, req.));
+    public ResponseEntity<ChildDTO> update(@PathVariable String id, @RequestBody RegisterChildRequest req) {
+        ChildDTO updated = childService.updateChild(id, req);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
 //    // Verify PIN at pickup — used by kiosk

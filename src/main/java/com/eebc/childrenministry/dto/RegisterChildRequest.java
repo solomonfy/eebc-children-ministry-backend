@@ -12,5 +12,6 @@ public record RegisterChildRequest (
     String grade,
     String specialNeeds,
     String notes,
+    String defaultRoomId,
     String pickupPin   // ← raw PIN from frontend, 4-6 digits
 ){}

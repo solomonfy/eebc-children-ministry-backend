@@ -1,5 +1,6 @@
 package com.eebc.childrenministry.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -66,6 +67,7 @@ public class Child extends Auditable {
     private List<String> medications = new ArrayList<>();
 
     @OneToMany(mappedBy = "child", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<ChildAllergy> allergies = new ArrayList<>();
 
     @Column(nullable = false)
