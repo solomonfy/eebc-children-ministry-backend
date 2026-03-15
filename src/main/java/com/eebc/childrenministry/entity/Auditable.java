@@ -1,6 +1,7 @@
 package com.eebc.childrenministry.entity;
 
 import com.eebc.childrenministry.audit.AuditableEntityListener;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PostLoad;
@@ -32,5 +33,6 @@ public abstract class Auditable {
         } catch (Exception ignored) {}
     }
 
+    @JsonIgnore
     public String getAuditSnapshot() { return _auditSnapshot; }
 }
