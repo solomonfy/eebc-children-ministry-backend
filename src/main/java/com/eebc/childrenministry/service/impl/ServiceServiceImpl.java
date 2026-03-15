@@ -100,8 +100,8 @@ public class ServiceServiceImpl implements ServiceService {
     public Service createService(ServiceRequest req) {
         try {
             validate(req);
-            if (serviceRepo.existsByServiceDateAndTypeAndCampusId(
-                    req.serviceDate(), req.type(), req.campusId())) {
+            if (serviceRepo.existsByServiceDateAndTypeAndCampusIdAndStatusNot(
+                    req.serviceDate(), req.type(), req.campusId(), "CANCELLED")) {
                 throw new IllegalStateException(
                         "A " + req.type() + " service on " + req.serviceDate()
                         + " already exists for this campus.");
@@ -272,7 +272,7 @@ public class ServiceServiceImpl implements ServiceService {
             String campusId, String ministryId) {
 
         List<Service> created = new ArrayList<>();
-        if (serviceRepo.existsByServiceDateAndTypeAndCampusId(date, type, campusId)) {
+        if (serviceRepo.existsByServiceDateAndTypeAndCampusIdAndStatusNot(date, type, campusId, "CANCELLED")) {
             logger.debug("Service {} on {} already exists for campus {}, skipping", type, date, campusId);
             return created;
         }

@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "services",
         uniqueConstraints = @UniqueConstraint(
-                name = "uq_service_date_type_campus",
-                columnNames = {"service_date", "type", "campus_id"}
+                name = "uq_service_date_type_campus_status",
+                columnNames = {"service_date", "type", "campus_id", "status"}
         )
 )
 @NoArgsConstructor

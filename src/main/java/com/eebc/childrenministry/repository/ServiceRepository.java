@@ -25,9 +25,9 @@ public interface ServiceRepository extends JpaRepository<Service, String> {
     List<Service> findByServiceDateGreaterThanEqualOrderByServiceDateAsc(
             LocalDate from);
 
-    // Used by cron + seed to avoid duplicates
-    boolean existsByServiceDateAndTypeAndCampusId(
-            LocalDate serviceDate, String type, String campusId);
+    // Used by cron + seed to avoid duplicates — excludes CANCELLED services
+    boolean existsByServiceDateAndTypeAndCampusIdAndStatusNot(
+            LocalDate serviceDate, String type, String campusId, String status);
 
     Optional<Service> findByServiceDateAndTypeAndCampusId(
             LocalDate serviceDate, String type, String campusId);
