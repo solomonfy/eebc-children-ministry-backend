@@ -121,6 +121,7 @@ public class ChildServiceImpl implements ChildService {
                     .findFirst()
                     .ifPresent(r -> child.setDefaultRoomId(r.getId()));
         }
+        child.setEnrolledDate(java.time.LocalDate.now());
         Child saved = childRepository.save(child);
         return toDTO(saved);
     }
