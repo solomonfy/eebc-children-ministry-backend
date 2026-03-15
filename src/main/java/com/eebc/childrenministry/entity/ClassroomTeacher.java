@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClassroomTeacher {
+public class ClassroomTeacher extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

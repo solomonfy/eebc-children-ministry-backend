@@ -84,6 +84,16 @@ public class ServiceController {
                 : ResponseEntity.notFound().build();
     }
 
+    /** PATCH /services/{id} — partial update (e.g. status-only cancel) */
+    @PatchMapping("/{id}")
+    public ResponseEntity<Service> patch(
+            @PathVariable String id, @RequestBody ServiceRequest req) {
+        Service updated = serviceService.updateService(id, req);
+        return updated != null
+                ? ResponseEntity.ok(updated)
+                : ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         serviceService.deleteService(id);

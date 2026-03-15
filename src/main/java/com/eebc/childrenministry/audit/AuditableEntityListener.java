@@ -1,6 +1,7 @@
 package com.eebc.childrenministry.audit;
 
 import com.eebc.childrenministry.config.RequestContext;
+import com.eebc.childrenministry.entity.Auditable;
 import com.eebc.childrenministry.entity.AuditHistory;
 import com.eebc.childrenministry.repository.AuditHistoryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,11 +10,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,7 +35,7 @@ public class AuditableEntityListener {
     // Static references — JPA listeners are not Spring beans by default,
     // so we use static injection via SpringBeanProvider
     private static AuditHistoryRepository auditRepo;
-    private static RequestContext requestContext;
+    private static ApplicationContext applicationContext;
 
     private static final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -46,8 +46,24 @@ public class AuditableEntityListener {
         auditRepo = repo;
     }
 
-    public static void setRequestContext(RequestContext ctx) {
-        requestContext = ctx;
+    public static void setApplicationContext(ApplicationContext ctx) {
+        applicationContext = ctx;
+    }
+
+    /** Called by Auditable#captureAuditSnapshot() — must be static and public. */
+    public static String serializeToJson(Object entity) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = mapper.convertValue(entity, Map.class);
+            map.remove("passwordHash");
+            map.remove("password_hash");
+            map.remove("password");
+            map.remove("pin");
+            map.remove("pinHash");
+            return mapper.writeValueAsString(map);
+        } catch (Exception e) {
+            return "{\"error\": \"serialization failed\"}";
+        }
     }
 
     // ── JPA Hooks ─────────────────────────────
@@ -60,10 +76,11 @@ public class AuditableEntityListener {
 
     @PreUpdate
     public void onUpdate(Object entity) {
-        // old_value not available in @PreUpdate without a second query —
-        // we store the current (post-change) snapshot as new_value
-        // For true old/new diffs, entities can implement Auditable#getAuditSnapshot()
-        save(entity, "UPDATE", null, toJson(entity),
+        String oldValue = null;
+        if (entity instanceof Auditable auditable) {
+            oldValue = auditable.getAuditSnapshot();
+        }
+        save(entity, "UPDATE", oldValue, toJson(entity),
                 describeAction(entity, "UPDATE"));
     }
 
@@ -89,12 +106,12 @@ public class AuditableEntityListener {
             String userAgent     = null;
 
             try {
-                if (requestContext != null) {
-                    changedBy     = requestContext.getUserId();
-                    changedByName = requestContext.getUserName() != null
-                            ? requestContext.getUserName() : "System";
-                    ipAddress     = requestContext.getIpAddress();
-                    userAgent     = requestContext.getUserAgent();
+                if (applicationContext != null) {
+                    RequestContext rc = applicationContext.getBean(RequestContext.class);
+                    changedBy     = rc.getUserId();
+                    changedByName = rc.getUserName() != null ? rc.getUserName() : "System";
+                    ipAddress     = rc.getIpAddress();
+                    userAgent     = rc.getUserAgent();
                 }
             } catch (Exception ignored) {
                 // RequestContext not available outside a request (e.g. cron jobs)
@@ -123,9 +140,22 @@ public class AuditableEntityListener {
     }
 
     /**
-     * Extracts the @Id field value via reflection.
+     * Extracts the entity ID for audit grouping.
+     * ClassroomTeacher uses userId so audit rows can be queried by teacher.
      */
     private String getEntityId(Object entity) {
+        // For ClassroomTeacher, group audit rows by the teacher's userId
+        if ("ClassroomTeacher".equals(entity.getClass().getSimpleName())) {
+            try {
+                Field f = entity.getClass().getDeclaredField("userId");
+                f.setAccessible(true);
+                Object val = f.get(entity);
+                return val != null ? val.toString() : null;
+            } catch (Exception e) {
+                logger.warn("Could not extract ClassroomTeacher.userId: {}", e.getMessage());
+            }
+        }
+
         try {
             Class<?> clazz = entity.getClass();
             while (clazz != null) {
@@ -144,27 +174,8 @@ public class AuditableEntityListener {
         return null;
     }
 
-    /**
-     * Serializes entity to JSON, masking sensitive fields.
-     */
     private String toJson(Object entity) {
-        try {
-            // Convert to map so we can mask sensitive fields
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = mapper.convertValue(entity, Map.class);
-
-            // Always mask password — safety net even if @JsonIgnore is present
-            map.remove("passwordHash");
-            map.remove("password_hash");
-            map.remove("password");
-            map.remove("pin");
-            map.remove("pinHash");
-
-            return mapper.writeValueAsString(map);
-        } catch (Exception e) {
-            logger.warn("Could not serialize entity to JSON: {}", e.getMessage());
-            return "{\"error\": \"serialization failed\"}";
-        }
+        return serializeToJson(entity);
     }
 
     /**

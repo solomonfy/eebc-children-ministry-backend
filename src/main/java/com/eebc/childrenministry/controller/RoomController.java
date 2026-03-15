@@ -1,7 +1,9 @@
 package com.eebc.childrenministry.controller;
 
 import com.eebc.childrenministry.dto.RoomRequest;
+import com.eebc.childrenministry.entity.Child;
 import com.eebc.childrenministry.entity.Room;
+import com.eebc.childrenministry.repository.ChildRepository;
 import com.eebc.childrenministry.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.Map;
 public class RoomController {
 
     private final RoomService roomService;
+    private final ChildRepository childRepository;
 
     // GET /rooms
     @GetMapping
@@ -54,5 +57,11 @@ public class RoomController {
     public ResponseEntity<Map<String, String>> delete(@PathVariable String id) {
         roomService.deleteRoom(id);
         return ResponseEntity.ok(Map.of("message", "Room deleted"));
+    }
+
+    // GET /rooms/{id}/children — children whose defaultRoomId = this room
+    @GetMapping("/{id}/children")
+    public ResponseEntity<List<Child>> getChildren(@PathVariable String id) {
+        return ResponseEntity.ok(childRepository.findByDefaultRoomId(id));
     }
 }

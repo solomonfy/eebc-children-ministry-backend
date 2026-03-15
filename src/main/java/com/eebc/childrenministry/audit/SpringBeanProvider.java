@@ -1,8 +1,8 @@
 package com.eebc.childrenministry.audit;
 
-import com.eebc.childrenministry.config.RequestContext;
 import com.eebc.childrenministry.repository.AuditHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -18,12 +18,12 @@ public class SpringBeanProvider implements ApplicationListener<ContextRefreshedE
     @Autowired
     private AuditHistoryRepository auditHistoryRepository;
 
-    // RequestContext is @RequestScope — we don't inject it here directly.
-    // Instead AuditableEntityListener reads it via ApplicationContext at call time.
-    // We only wire the repo once on startup.
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         AuditableEntityListener.setAuditRepo(auditHistoryRepository);
+        AuditableEntityListener.setApplicationContext(applicationContext);
     }
 }

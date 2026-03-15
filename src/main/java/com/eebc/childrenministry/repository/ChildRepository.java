@@ -24,4 +24,5 @@ public interface ChildRepository extends JpaRepository<Child, String> {
 
     List<Child> findByFamilyId(String familyId);
     List<Child> findByCampusId(String campusId);
+    List<Child> findByDefaultRoomId(String defaultRoomId);
 }
