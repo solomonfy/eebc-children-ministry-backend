@@ -1,13 +1,13 @@
 package com.eebc.childrenministry.controller;
 
 import com.eebc.childrenministry.entity.Attendance;
-import com.eebc.childrenministry.repository.AttendanceRepository;
 import com.eebc.childrenministry.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/attendance")
@@ -22,12 +22,19 @@ public class AttendanceController {
     }
 
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<List<Attendance>> listRoomAttendance(@RequestBody String roomId) {
-        return ResponseEntity.ok(attendanceService.getAllAttendances());
+    public ResponseEntity<List<Attendance>> listRoomAttendance(@PathVariable String roomId) {
+        List<Attendance> records = attendanceService.getAllAttendances()
+                .stream()
+                .filter(a -> roomId.equals(a.getRoomId()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(records);
     }
 
     @PostMapping
     public ResponseEntity<List<Attendance>> createMany(@RequestBody List<Attendance> records) {
-        return ResponseEntity.ok(attendanceService.getAllAttendances());
+        List<Attendance> saved = records.stream()
+                .map(attendanceService::createAttendance)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(saved);
     }
 }
